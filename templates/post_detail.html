@@ -1,7 +1,307 @@
 {% extends "base.html" %}
+
 {% block content %}
-<div class="post-entry">
-<h2>{{ post.title }}</h2>
-<p>{{ post.body }}</p>
+<style>
+  .post-container {
+    max-width: 720px;
+    margin: 24px auto;
+    padding: 28px;
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+  /* Nút mũi tên quay lại */
+  .btn-back-home {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    color: #4b5563;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 18px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    background: #f3f4f6;
+    transition: 0.15s ease;
+  }
+  .btn-back-home:hover {
+    background: #e5e7eb;
+    color: #111827;
+  }
+  .post-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 14px;
+  }
+  .post-body {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #374151;
+    white-space: pre-line;
+    margin-bottom: 20px;
+  }
+  .post-media-box {
+    margin: 20px 0;
+    text-align: center;
+  }
+  .post-image {
+    max-width: 100%;
+    max-height: 480px;
+    object-fit: contain;
+    border-radius: 10px;
+  }
+  .audio-player {
+    width: 100%;
+    margin-top: 15px;
+    border-radius: 30px;
+  }
+  
+  /* Thanh tương tác & Nút Tim Hiện Đại */
+  .interaction-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-top: 1px solid #f3f4f6;
+    border-bottom: 1px solid #f3f4f6;
+    margin: 24px 0;
+  }
+  .btn-like-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    border-radius: 9999px;
+    border: 1.5px solid #fecdd3;
+    background-color: #fff1f2;
+    color: #e11d48;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+  }
+  .btn-like-pill:hover {
+    transform: scale(1.05);
+    background-color: #ffe4e6;
+  }
+  .btn-like-pill.liked {
+    background-color: #e11d48;
+    color: #ffffff;
+    border-color: #e11d48;
+    box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3);
+  }
+  .heart-icon {
+    font-size: 16px;
+    transition: transform 0.2s ease;
+  }
+  .btn-like-pill:active .heart-icon {
+    transform: scale(1.3);
+  }
+
+  /* Nút Edit / Delete */
+  .post-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .btn-action {
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    border-radius: 6px;
+  }
+  .btn-edit { background: #2563eb; color: #fff; }
+  .btn-delete { background: #ef4444; color: #fff; }
+
+  /* Bình luận */
+  .comments-section { margin-top: 30px; }
+  .comments-header { font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #111827; }
+  .comment-input-box textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+  }
+  .btn-comment-submit {
+    margin-top: 8px;
+    background-color: #2563eb;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .login-prompt {
+    padding: 14px;
+    background: #f9fafb;
+    border: 1px dashed #d1d5db;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 14px;
+    color: #6b7280;
+  }
+  .login-prompt a { color: #2563eb; font-weight: 600; text-decoration: none; }
+  .comment-list { margin-top: 24px; display: flex; flex-direction: column; gap: 16px; }
+  .comment-item { background: #f9fafb; padding: 12px 16px; border-radius: 8px; }
+  .comment-meta { font-size: 13px; color: #6b7280; margin-bottom: 6px; display: flex; justify-content: space-between; }
+  .comment-body { font-size: 14px; color: #1f2937; line-height: 1.4; }
+  .btn-reply-toggle { font-size: 12px; color: #2563eb; background: none; border: none; cursor: pointer; font-weight: 600; margin-top: 6px; padding: 0; }
+  .reply-box { display: none; margin-top: 10px; }
+  .replies-list { margin-top: 12px; margin-left: 20px; border-left: 2px solid #e5e7eb; padding-left: 12px; display: flex; flex-direction: column; gap: 10px; }
+</style>
+
+<div class="post-container">
+  <!-- Mũi tên quay lại trang chủ -->
+  <a href="{% url 'blog_home' %}" class="btn-back-home">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 12H5M12 19l-7-7 7-7"/>
+    </svg>
+    Quay lại
+  </a>
+
+  <h1 class="post-title">{{ post.title }}</h1>
+  <p class="post-body">{{ post.body }}</p>
+
+  {% if post.image %}
+    <div class="post-media-box">
+      <img src="{{ post.image.url }}" alt="{{ post.title }}" class="post-image">
+    </div>
+  {% endif %}
+
+  {% if post.audio %}
+    <div class="post-media-box">
+      <audio controls class="audio-player">
+        <source src="{{ post.audio.url }}" type="audio/mpeg">
+      </audio>
+    </div>
+  {% endif %}
+
+  <!-- Thanh tương tác -->
+  <div class="interaction-bar">
+    {% if user.is_authenticated %}
+      <button id="like-btn" class="btn-like-pill {% if user in post.likes.all %}liked{% endif %}" onclick="handleLike()">
+        <span class="heart-icon">♥</span>
+        <span id="like-text">{% if user in post.likes.all %}Đã thích{% else %}Thích{% endif %}</span>
+        <span id="like-count">({{ post.total_likes }})</span>
+      </button>
+    {% else %}
+      <a href="{% url 'login' %}?next={{ request.path }}" class="btn-like-pill">
+        <span class="heart-icon">♥</span>
+        <span>Thích</span>
+        <span>({{ post.total_likes }})</span>
+      </a>
+    {% endif %}
+
+    {% if user == post.author or user.is_staff %}
+      <div class="post-actions">
+        <a href="{% url 'post_edit' post.pk %}" class="btn-action btn-edit">Sửa</a>
+        <a href="{% url 'post_delete' post.pk %}" class="btn-action btn-delete">Xóa</a>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Bình luận -->
+  <div class="comments-section">
+    <h3 class="comments-header">Bình luận ({{ post.comments.count }})</h3>
+
+    {% if user.is_authenticated %}
+      <div class="comment-input-box">
+        <form action="{% url 'add_comment' post.pk %}" method="post">
+          {% csrf_token %}
+          <textarea name="body" placeholder="Viết bình luận của bạn..." required></textarea>
+          <button type="submit" class="btn-comment-submit">Gửi bình luận</button>
+        </form>
+      </div>
+    {% else %}
+      <div class="login-prompt">
+        Vui lòng <a href="{% url 'login' %}?next={{ request.path }}">đăng nhập</a> để bình luận bài viết.
+      </div>
+    {% endif %}
+
+    <div class="comment-list">
+      {% for comment in post.comments.all %}
+        {% if not comment.parent %}
+          <div class="comment-item">
+            <div class="comment-meta">
+              <strong>{{ comment.author.username }}</strong>
+              <span>{{ comment.created_at|date:"d/m/Y H:i" }}</span>
+            </div>
+            <div class="comment-body">{{ comment.body }}</div>
+
+            {% if user.is_authenticated %}
+              <button class="btn-reply-toggle" onclick="toggleReply('reply-box-{{ comment.id }}')">Trả lời</button>
+              
+              <div id="reply-box-{{ comment.id }}" class="reply-box">
+                <form action="{% url 'add_comment' post.pk %}" method="post">
+                  {% csrf_token %}
+                  <input type="hidden" name="parent_id" value="{{ comment.id }}">
+                  <textarea name="body" placeholder="Nhập câu trả lời..." required style="width:100%; height:60px; padding:6px; border:1px solid #d1d5db; border-radius:6px; font-size:13px;"></textarea>
+                  <button type="submit" class="btn-comment-submit" style="margin-top:4px;">Gửi trả lời</button>
+                </form>
+              </div>
+            {% endif %}
+
+            {% if comment.replies.all %}
+              <div class="replies-list">
+                {% for reply in comment.replies.all %}
+                  <div class="comment-item" style="background: #ffffff; border: 1px solid #e5e7eb;">
+                    <div class="comment-meta">
+                      <strong>{{ reply.author.username }}</strong>
+                      <span>{{ reply.created_at|date:"d/m/Y H:i" }}</span>
+                    </div>
+                    <div class="comment-body">{{ reply.body }}</div>
+                  </div>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
 </div>
+
+<script>
+  // Xử lý Thả Tim không reload trang để giữ nguyên nhạc
+  function handleLike() {
+    fetch("{% url 'post_like' post.pk %}", {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": "{{ csrf_token }}",
+        "X-Requested-With": "XMLHttpRequest"
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      const btn = document.getElementById("like-btn");
+      const text = document.getElementById("like-text");
+      const count = document.getElementById("like-count");
+
+      if (data.liked) {
+        btn.classList.add("liked");
+        text.innerText = "Đã thích";
+      } else {
+        btn.classList.remove("liked");
+        text.innerText = "Thích";
+      }
+      count.innerText = `(${data.total_likes})`;
+    })
+    .catch(err => console.error(err));
+  }
+
+  function toggleReply(elementId) {
+    var box = document.getElementById(elementId);
+    box.style.display = (box.style.display === "block") ? "none" : "block";
+  }
+</script>
 {% endblock content %}

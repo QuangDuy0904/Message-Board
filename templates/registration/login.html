@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  .auth-card {
+    max-width: 420px;
+    margin: 40px auto;
+    padding: 32px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+  .auth-card h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    font-weight: 700;
+    color: #111827;
+  }
+  .auth-card p {
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+  }
+  .auth-card input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 15px;
+  }
+  .auth-card input:focus {
+    outline: none;
+    border-color: #2563eb;
+  }
+  .errorlist {
+    color: #dc2626;
+    font-size: 13px;
+    font-weight: 500;
+    margin: 4px 0 0 0;
+    padding-left: 18px;
+  }
+  .btn-submit {
+    width: 100%;
+    padding: 11px;
+    background: #2563eb;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  .btn-submit:hover {
+    background: #1d4ed8;
+  }
+  .auth-footer {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 14px;
+    color: #6b7280;
+  }
+  .auth-footer a {
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 600;
+  }
+</style>
+
+<div class="auth-card">
+  <h2>Đăng nhập</h2>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn-submit">Đăng nhập</button>
+  </form>
+
+  <div class="auth-footer">
+    Chưa có tài khoản? <a href="{% url 'signup' %}">Đăng ký ngay</a>
+  </div>
+</div>
+{% endblock content %}

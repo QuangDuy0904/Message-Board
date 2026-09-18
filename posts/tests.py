@@ -7,6 +7,7 @@ class PostTests(TestCase):
          cls.post = Post.objects.create(text="This is a test!")
     def test_model_content(self):
          self.assertEqual(self.post.text, "This is a test!")
+         
     def test_url_exists_at_correct_location(self): # new
         response = self.client.get("/")
         self.assertEqual(response.status_code, 200)

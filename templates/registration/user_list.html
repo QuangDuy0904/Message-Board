@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  .user-list-container {
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 24px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+  .table-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #111827;
+  }
+  .user-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+  }
+  .user-table th, .user-table td {
+    padding: 12px;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 14px;
+  }
+  .user-table th {
+    background-color: #f9fafb;
+    color: #374151;
+    font-weight: 600;
+  }
+  .badge-admin {
+    background-color: #fee2e2;
+    color: #dc2626;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .badge-user {
+    background-color: #e0f2fe;
+    color: #0369a1;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+</style>
+
+<div class="user-list-container">
+  <h2 class="table-title">Danh sách thành viên đã đăng ký (Tổng: {{ users|length }})</h2>
+
+  <table class="user-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Tên tài khoản (Username)</th>
+        <th>Ngày tham gia</th>
+        <th>Vai trò</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+        <tr>
+          <td>{{ u.id }}</td>
+          <td><strong>{{ u.username }}</strong></td>
+          <td>{{ u.date_joined|date:"d/m/Y H:i" }}</td>
+          <td>
+            {% if u.is_staff %}
+              <span class="badge-admin">Admin</span>
+            {% else %}
+              <span class="badge-user">Thành viên</span>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock content %}
